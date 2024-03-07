@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 const getContacts = async (req, res) => {
   try {
-    const [data] = await db.query("select * from contact");
+    const [data] = await db.query("SELECT * from contact");
     if (!data.length) {
       return res.status(404).send({
         success: false,
@@ -10,8 +10,6 @@ const getContacts = async (req, res) => {
       });
     }
     res.status(200).send({
-      success: true,
-      message: "Data Found",
       data: data,
     });
   } catch (error) {
@@ -46,8 +44,6 @@ const getContactByID = async (req, res) => {
       });
     }
     res.status(200).send({
-      success: true,
-      message: "Contact Found",
       contactDetails: data,
     });
   } catch (error) {
@@ -63,31 +59,36 @@ const createContact = async (req, res) => {
   try {
     const { name, email, number, message } = req.body;
     if (!name || !email || !number || !message) {
-      res.status(500).send({
+      return res.status(400).json({
         success: false,
-        message: "Please Provide all details ",
+        message: "Please provide all details.",
       });
     }
+    // Assuming db.query returns a Promise
     const data = await db.query(
-      `insert into contact (name,email,number,message) values (?,?,?,?)`,
+      `INSERT INTO contact (name, email, number, message) VALUES (?, ?, ?, ?)`,
       [name, email, number, message]
     );
     if (!data) {
-      return res.status(404).send({
+      return res.status(500).json({
         success: false,
-        message: "error in inseert ",
+        message: "Error in inserting data.",
       });
     }
-    res.status(201).send({
+    return res.status(201).json({
       success: true,
-      message: "new Contact added",
+      message: "New contact added successfully.",
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).send({
+    console.error(error);
+    return res.status(500).json({
       success: false,
-      message: "error in Student Api",
+      message: "Error in backend API.",
+      error: error.message,
     });
   }
 };
+
+// module.exports = { createContact };
+
 module.exports = { getContacts, getContactByID, createContact };
